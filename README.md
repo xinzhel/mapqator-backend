@@ -39,7 +39,8 @@ psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE mapqator TO postgres;"
 psql -U postgres -d mapqator -a -f schema.sql
 ```
 
-An empty database will be created with the name `mapqator` and the schema will be created. You need to create an user to login to the website. For that you need to add an entry in the `users` table.
+An empty database will be created with the name `mapqator` and the schema will be created. 
+If you plan to host the frontend as well, you need to create an user to login to the website. For that you need to add an entry in the `users` table.
 
 ```sh
 psql -U postgres -d mapqator -c "INSERT INTO users (username, password) VALUES ('your_username', '******');"
