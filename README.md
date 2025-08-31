@@ -36,10 +36,13 @@ npm install
 ```sh
 psql -U postgres -c "CREATE DATABASE mapqator;"
 psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE mapqator TO postgres;"
-psql -U postgres -d mapqator -a -f schema.sql
+psql -U postgres -d mapqator -a -f database\schema.sql
 ```
 
-An empty database will be created with the name `mapqator` and the schema will be created. 
+An empty database will be created with the name `mapqator` and the schema will be created.
+
+If you want the cached data that was used for MapEval benchmark you should use: `psql -U postgres -d mapqator -a -f database\dump.sql` instead of `psql -U postgres -d mapqator -a -f database\schema.sql`.
+
 If you plan to host the frontend as well, you need to create an user to login to the website. For that you need to add an entry in the `users` table.
 
 ```sh
@@ -67,3 +70,4 @@ npm start
 ```
 
 You should find that the project is working!
+
