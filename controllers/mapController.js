@@ -764,13 +764,14 @@ const getDetailsCustom = async (req, res) => {
 
 const searchText = async (req, res) => {
 	const key = req.header("google_maps_api_key");
+	const queryText = req.query.query;
 	if (key) {
 		try {
 			const response = await axios.get(
 				"https://maps.googleapis.com/maps/api/place/textsearch/json",
 				{
 					params: {
-						query: req.query.query,
+						query: queryText,
 						key: key,
 						language: "en",
 					},
@@ -781,19 +782,19 @@ const searchText = async (req, res) => {
 				await placeRepository.createPlace(place);
 			}
 			// console.log(response.data);
-			res.status(200).send(response.data);
+			return res.status(200).send(response.data);
 		} catch (error) {
 			console.error(error.message);
-			res.status(400).send({ error: "An error occurred" });
 		}
-	} else if (local.success && local.data.length > 0) {
-		const local = await mapRepository.searchText(req.query.query);
-		console.log(local.data);
-		res.status(200).send({ results: local.data });
-		// res.status(400).send({
-		// 	error: "User is not authorized to use the Google Maps API",
-		// });
 	}
+
+	const local = await mapRepository.searchText(queryText);
+	if (local.success && local.data.length > 0) {
+		console.log(local.data);
+		return res.status(200).send({ results: local.data, status: "LOCAL" });
+	}
+
+	return res.status(400).send({ error: "An error occurred" });
 };
 
 const searchInside = async (req, res) => {
