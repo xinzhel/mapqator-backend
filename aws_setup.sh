@@ -24,7 +24,7 @@ sudo -u postgres psql -c "ALTER USER postgres PASSWORD '*******';"
 # ==== Step 4. Setup database ====
 cd ~
 if [ ! -d "mapqator-backend" ]; then
-    git clone https://github.com/MapQaTor/mapqator-backend.git
+    git clone https://github.com/xinzhel/mapqator-backend.git
 fi
 cd mapqator-backend
 
