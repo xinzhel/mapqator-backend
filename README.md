@@ -37,6 +37,7 @@ npm install
 psql -U postgres -c "CREATE DATABASE mapqator;"
 psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE mapqator TO postgres;"
 psql -U postgres -d mapqator -a -f database\schema.sql
+# psql -U postgres -c "DROP DATABASE mapqator;"
 ```
 
 An empty database will be created with the name `mapqator` and the schema will be created.
@@ -71,3 +72,102 @@ npm start
 
 You should find that the project is working!
 
+* Check credential
+```sh
+curl -X POST http://localhost:5000/api/login \
+     -H "Content-Type: application/json" \
+     -d '{"username": "test", "password": "123"}'
+```
+
+### Some Postgres Commands
+```sh
+# show databases
+psql -U postgres -l  
+
+# show tables
+psql -U postgres -d mapqator -c "\dt"
+```
+
+
+### (Optional) AWS Deployment
+
+
+```bash
+aws ec2 request-spot-instances \
+  --instance-count 1 \
+  --type one-time \
+  --launch-specification '{
+            "ImageId": "ami-0b8d527345fdace59",
+            "KeyName": "race_lits_server",
+            "BlockDeviceMappings": [
+                {
+                    "DeviceName": "/dev/xvda",
+                    "Ebs": {
+                         "VolumeSize": 30,
+                         "VolumeType": "gp3",
+                         "DeleteOnTermination": true
+                    }
+                }
+            ],
+            "EbsOptimized": true,
+            "SubnetId": "subnet-070b5b80b8e23c5bd",
+            "SecurityGroupIds": ["sg-0fed3f02e16c4f50e"],
+            "InstanceType": "t3.medium"
+        }'
+```
+
+```bash
+aws ec2 run-instances \
+  --image-id ami-0b8d527345fdace59 \
+  --count 1 \
+  --instance-type t3.medium \
+  --key-name race_lits_server \
+  --subnet-id subnet-070b5b80b8e23c5bd \
+  --security-group-ids sg-0fed3f02e16c4f50e \
+  --block-device-mappings '[
+    {
+      "DeviceName": "/dev/xvda",
+      "Ebs": {
+        "VolumeSize": 30,
+        "VolumeType": "gp3",
+        "DeleteOnTermination": true
+      }
+    }
+  ]' \
+  --ebs-optimized \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=mapqator-backend}]'
+```
+
+* t3.medium: $0.042 On Demand
+* "ami-0b8d527345fdace59": Ubuntu Server 24.04 LTS (HVM)
+
+
+Output will be like:
+
+```json
+{
+  "ReservationId": "r-0122ae8b1ab9ee192",
+  "Instances": [
+    {
+      "InstanceId": "i-0320ed19eea45738a",
+      "State": { "Name": "pending" }
+    }
+  ]
+}
+```
+
+* ReservationId → internal grouping ID when you launch multiple instances in one API call.
+It is not reusable or queryable like a Spot Request ID.
+* InstanceId → the actual resource you control (i-0320ed19eea45738a).
+
+Track or Manage On-Demand Instances
+```bash
+aws ec2 describe-instances --instance-ids i-0320ed19eea45738a
+aws ec2 stop-instances --instance-ids i-0320ed19eea45738a
+aws ec2 start-instances --instance-ids i-0320ed19eea45738a
+```
+
+ssh 
+```bash
+ssh -i ~/.ssh/race_lits_server.pem ubuntu@54.79.149.133
+```

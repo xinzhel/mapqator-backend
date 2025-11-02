@@ -34,6 +34,9 @@ app.use(bodyParser.json({ limit: "100mb" }));
 // Use cookie-parser middleware
 
 app.use("/api", appRoutes);
+const authRoutes = require("./routes/authRoutes");
+app.use("/api", authRoutes);         // add this line
+
 
 app.get("/invalid", (req, res) => {
 	res.status(401).send({ error: "access denied" });
